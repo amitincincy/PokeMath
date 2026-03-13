@@ -8,6 +8,218 @@
   /* System font stack — fully offline, no external requests needed */
 </style>
 <style>
+/* ══════════════════════════════════════════════
+   TRAINER LOGIN SCREEN
+══════════════════════════════════════════════ */
+#trainer-screen {
+  position: fixed; inset: 0; z-index: 9000;
+  display: flex; align-items: center; justify-content: center;
+  background: #050010;
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(136,51,255,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(74,158,255,0.10) 0%, transparent 70%);
+  overflow: hidden;
+}
+/* grid floor lines */
+#trainer-screen::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(100,40,200,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100,40,200,.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+/* floating particles canvas */
+#trainer-bg-canvas {
+  position:absolute; inset:0; width:100%; height:100%;
+  pointer-events:none; opacity:.6;
+}
+
+#trainer-card {
+  position: relative; z-index: 1;
+  background: linear-gradient(160deg, #0e0025 0%, #150035 60%, #0a001e 100%);
+  border: 2px solid #5522aa;
+  border-radius: 28px;
+  padding: 28px 32px 28px;
+  width: 100%; max-width: 420px;
+  max-height: 92vh; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: #5522aa transparent;
+  box-shadow: 0 0 60px rgba(120,40,255,0.4), 0 0 120px rgba(120,40,255,0.15),
+              inset 0 0 40px rgba(80,20,180,0.1);
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  animation: trainer-arrive .6s cubic-bezier(.34,1.56,.64,1) both;
+}
+@keyframes trainer-arrive {
+  from { transform: scale(.7) translateY(40px); opacity:0; }
+  to   { transform: scale(1)  translateY(0);    opacity:1; }
+}
+/* corner accents */
+#trainer-card::before, #trainer-card::after {
+  content:''; position:absolute; width:20px; height:20px;
+  border-color: #8833ff; border-style: solid;
+}
+#trainer-card::before { top:12px; left:12px; border-width:2px 0 0 2px; border-radius:4px 0 0 0; }
+#trainer-card::after  { bottom:12px; right:12px; border-width:0 2px 2px 0; border-radius:0 0 4px 0; }
+
+/* header */
+#trainer-logo {
+  font-family:'Trebuchet MS',system-ui,sans-serif;
+  font-size:26px; font-weight:900; letter-spacing:3px; text-align:center;
+  background: linear-gradient(135deg,#cc88ff,#ffffff 50%,#aa44ff);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  filter: drop-shadow(0 0 12px rgba(180,100,255,0.7));
+  line-height:1.3; margin-bottom:2px;
+}
+#trainer-tagline {
+  font-size:11px; color:#7755aa; letter-spacing:2px;
+  text-transform:uppercase; text-align:center; margin-top:0;
+}
+
+/* ── Sign-in form fields ── */
+.field-label,
+#signin-name-label, #signin-pin-label, #new-pin-label {
+  font-size:11px; color:#9966cc; text-transform:uppercase;
+  letter-spacing:2px; align-self:flex-start;
+}
+#signin-name-input {
+  width:100%; background:rgba(60,10,120,.4);
+  border:2px solid #7733cc; border-radius:16px;
+  color:#f0d8ff; font-size:30px; font-weight:900;
+  font-family:'Trebuchet MS',system-ui,sans-serif;
+  padding:20px 24px; outline:none; text-align:center;
+  transition: border-color .2s, box-shadow .2s;
+  letter-spacing:3px;
+  box-shadow: inset 0 0 24px rgba(120,40,220,.15);
+}
+#signin-name-input::placeholder { color:#6633aa; font-weight:500; letter-spacing:.5px; font-size:18px; }
+#signin-name-input:focus {
+  border-color:#cc66ff;
+  box-shadow: 0 0 0 4px rgba(180,80,255,.3), 0 0 30px rgba(170,60,255,.25),
+              inset 0 0 24px rgba(140,50,240,.2);
+}
+/* PIN dots row */
+#pin-row, #pin-row-new {
+  display:flex; gap:12px; justify-content:center; width:100%;
+}
+.pin-dot {
+  width:58px; height:58px; border-radius:14px;
+  background:rgba(80,30,140,.25); border:2px solid #5522aa;
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; font-weight:900; color:#cc88ff;
+  transition: border-color .2s, box-shadow .2s, background .2s;
+  letter-spacing:0; user-select:none;
+}
+.pin-dot.filled {
+  background:rgba(120,50,200,.35); border-color:#aa55ff;
+  box-shadow:0 0 14px rgba(170,85,255,.35);
+}
+.pin-dot.active {
+  border-color:#cc88ff;
+  box-shadow:0 0 0 3px rgba(200,136,255,.25), 0 0 18px rgba(200,136,255,.2);
+  animation: pin-blink .9s ease-in-out infinite;
+}
+@keyframes pin-blink {
+  0%,100%{ border-color:#cc88ff; }
+  50%    { border-color:#7733cc; }
+}
+/* numpad — applies to both sign-in and new trainer */
+#numpad, #numpad-new {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:100%;
+}
+.np-btn {
+  height:52px; border-radius:12px; border:1.5px solid #4422aa;
+  background:rgba(60,20,120,.3); color:#e8d0ff;
+  font-size:20px; font-weight:800; cursor:pointer;
+  font-family:'Trebuchet MS',system-ui,sans-serif;
+  transition: all .12s; display:flex; align-items:center; justify-content:center;
+  -webkit-tap-highlight-color: transparent;
+}
+.np-btn:hover  { background:rgba(100,40,180,.4); border-color:#8833ff; transform:scale(1.04); }
+.np-btn:active { transform:scale(.96); background:rgba(140,60,220,.5); }
+.np-btn.del    { color:#cc88ff; font-size:18px; }
+.np-btn.empty  { visibility:hidden; cursor:default; pointer-events:none; }
+/* error shake */
+@keyframes pin-error {
+  0%,100%{ transform:translateX(0); }
+  20%    { transform:translateX(-8px); }
+  40%    { transform:translateX(8px); }
+  60%    { transform:translateX(-6px); }
+  80%    { transform:translateX(6px); }
+}
+#pin-row.error, #pin-row-new.error { animation:pin-error .4s ease; }
+.pin-dot.error { border-color:#ff4f5a !important; color:#ff4f5a; }
+/* back link */
+.back-link {
+  font-size:13px; font-weight:700; color:#cc88ff; cursor:pointer;
+  text-align:center; padding:10px 0;
+  border:1.5px solid #5522aa; border-radius:12px; width:100%;
+  background:rgba(60,20,120,.25);
+  transition: all .18s; letter-spacing:.5px;
+}
+.back-link:hover { color:#fff; border-color:#aa55ff; background:rgba(100,40,180,.4); }
+
+/* mode tabs */
+#login-tabs {
+  display:flex; width:100%; border-radius:12px; overflow:hidden;
+  border:1.5px solid #5522aa; margin-bottom:4px;
+}
+.login-tab {
+  flex:1; padding:10px; text-align:center; cursor:pointer;
+  font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px;
+  color:#7755aa; background:rgba(40,10,80,.4);
+  transition: all .2s; font-family:'Trebuchet MS',system-ui,sans-serif;
+}
+.login-tab.active { background:rgba(120,50,200,.5); color:#e8d0ff; }
+
+#trainer-start-btn {
+  width:100%; padding:14px; border-radius:14px; border:none; cursor:pointer;
+  font-size:16px; font-weight:800; letter-spacing:2px; text-transform:uppercase;
+  font-family:'Trebuchet MS',system-ui,sans-serif;
+  background: linear-gradient(135deg,#7722dd,#aa44ff);
+  color:#fff;
+  box-shadow: 0 4px 0 #4400aa, 0 8px 24px rgba(120,40,255,.4);
+  transition: all .15s;
+  opacity:.4; pointer-events:none;
+}
+#trainer-start-btn.ready {
+  opacity:1; pointer-events:all;
+  animation: btn-pulse 2s ease-in-out infinite;
+}
+#trainer-start-btn.ready:hover { transform:translateY(-2px); box-shadow:0 6px 0 #4400aa,0 12px 30px rgba(120,40,255,.5); }
+#trainer-start-btn.ready:active { transform:translateY(3px); box-shadow:0 1px 0 #4400aa; }
+@keyframes btn-pulse {
+  0%,100%{ box-shadow:0 4px 0 #4400aa, 0 8px 24px rgba(120,40,255,.4); }
+  50%    { box-shadow:0 4px 0 #4400aa, 0 8px 40px rgba(180,80,255,.7); }
+}
+#login-error-msg {
+  font-size:12px; color:#ff6b6b; text-align:center; min-height:16px;
+  font-style:italic; letter-spacing:.3px;
+}
+
+
+/* exit button for screen */
+#trainer-screen-exit {
+  display:none; position:absolute; top:16px; right:16px;
+  background:none; border:none; color:#5533aa; font-size:20px; cursor:pointer;
+  z-index:2; transition:color .2s;
+}
+#trainer-screen-exit:hover { color:#cc88ff; }
+#trainer-screen-exit.show { display:block; }
+
+/* trainer HUD in game */
+#trainer-hud {
+  display:none; align-items:center; gap:8px;
+  background:var(--card); border:1px solid var(--border);
+  border-radius:12px; padding:8px 12px; margin-bottom:14px;
+  cursor:pointer; transition: border-color .2s;
+}
+#trainer-hud:hover { border-color:#8833ff; }
+#trainer-hud.show { display:flex; }
+#hud-avatar { font-size:22px; }
+#hud-name { font-size:13px; font-weight:800; color:#e8d0ff; }
+#hud-badge { font-size:10px; color:#8833ff; margin-left:auto;
+  font-style:italic; }
+</style>
+<style>
 :root {
   --bg:        #0d1526;
   --bg2:       #131e35;
@@ -343,6 +555,37 @@ h1 {
 .feedback-right { color: var(--green); }
 .feedback-wrong { color: var(--red); }
 
+
+/* ── Ninja Kitty cards ── */
+#ninja-cards-container {
+  display: flex; flex-direction: column; gap: 8px;
+  margin-bottom: 14px; width: 100%;
+}
+.ninja-card-badge {
+  display: flex; align-items: center; gap: 12px;
+  background: linear-gradient(135deg, #0a0020, #180040);
+  border: 2px solid #7722cc; border-radius: 16px;
+  padding: 10px 16px; cursor: pointer; width: 100%;
+  box-shadow: 0 0 16px rgba(120,40,255,.3), inset 0 0 14px rgba(80,20,160,.15);
+  transition: all .18s;
+  animation: ninja-badge-pulse 3s ease-in-out infinite;
+}
+.ninja-card-badge:hover {
+  border-color: #cc55ff;
+  box-shadow: 0 0 30px rgba(180,80,255,.6), inset 0 0 20px rgba(120,40,200,.3);
+  transform: translateY(-2px) scale(1.02);
+}
+.ninja-card-badge:active { transform: scale(.98); }
+@keyframes ninja-badge-pulse {
+  0%,100% { box-shadow: 0 0 16px rgba(120,40,255,.3), inset 0 0 14px rgba(80,20,160,.15); }
+  50%      { box-shadow: 0 0 30px rgba(180,80,255,.55), inset 0 0 18px rgba(120,40,200,.25); }
+}
+.ninja-card-canvas { border-radius: 10px; border: 1.5px solid #8833ff; flex-shrink: 0; }
+.ninja-card-info { flex: 1; }
+.ninja-card-title { font-size: 14px; font-weight: 900; color: #e8d0ff; letter-spacing: 1px; }
+.ninja-card-sub   { font-size: 11px; color: #8855cc; margin-top: 2px; }
+.ninja-card-num   { font-size: 12px; color: #cc88ff; font-weight: 800; text-align: right; white-space: nowrap; }
+
 /* ── Progress bars ── */
 .bar-section { margin-bottom: 12px; }
 .bar-label {
@@ -591,6 +834,100 @@ body.ninja-mode::after {
 </style>
 </head>
 <body>
+
+<!-- ══ TRAINER LOGIN SCREEN ══ -->
+<div id="trainer-screen">
+  <canvas id="trainer-bg-canvas"></canvas>
+  <div id="trainer-card">
+
+    <!-- Logo -->
+    <div style="text-align:center;">
+      <div id="trainer-logo">⚡ PokéMath</div>
+      <div id="trainer-tagline">Trainer's Arena</div>
+    </div>
+
+    <!-- Mode tabs: Sign In / New Trainer -->
+    <div id="login-tabs">
+      <div class="login-tab active" id="tab-signin" onclick="switchTab('signin')">Sign In</div>
+      <div class="login-tab"        id="tab-new"    onclick="switchTab('new')">New Trainer</div>
+    </div>
+
+    <!-- Saved trainer list (Sign In tab) -->
+    <div id="panel-signin" style="width:100%;display:flex;flex-direction:column;gap:10px;">
+      <div id="saved-trainers-list" style="display:flex;flex-direction:column;gap:8px;width:100%;max-height:160px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#5522aa transparent;"></div>
+      <div id="no-trainers-msg" style="display:none;text-align:center;color:#5533aa;font-size:13px;padding:12px 0;">No trainers yet.<br>Create one on the New Trainer tab!</div>
+
+      <!-- PIN entry for selected trainer -->
+      <div id="signin-pin-section" style="display:none;flex-direction:column;gap:10px;align-items:center;">
+        <div id="signin-selected-name" style="font-size:15px;font-weight:800;color:#e8d0ff;text-align:center;"></div>
+        <div id="signin-pin-label" style="align-self:center;">Enter your 4-digit PIN</div>
+        <div id="pin-row">
+          <div class="pin-dot active" id="pd0">·</div>
+          <div class="pin-dot"        id="pd1">·</div>
+          <div class="pin-dot"        id="pd2">·</div>
+          <div class="pin-dot"        id="pd3">·</div>
+        </div>
+        <div id="numpad">
+          <button class="np-btn" onclick="npPress('1')">1</button>
+          <button class="np-btn" onclick="npPress('2')">2</button>
+          <button class="np-btn" onclick="npPress('3')">3</button>
+          <button class="np-btn" onclick="npPress('4')">4</button>
+          <button class="np-btn" onclick="npPress('5')">5</button>
+          <button class="np-btn" onclick="npPress('6')">6</button>
+          <button class="np-btn" onclick="npPress('7')">7</button>
+          <button class="np-btn" onclick="npPress('8')">8</button>
+          <button class="np-btn" onclick="npPress('9')">9</button>
+          <button class="np-btn empty"></button>
+          <button class="np-btn" onclick="npPress('0')">0</button>
+          <button class="np-btn del" onclick="npDel()">⌫</button>
+        </div>
+        <div id="login-error-msg"></div>
+        <div class="back-link" onclick="cancelPinEntry()">← Back to trainers</div>
+      </div>
+    </div>
+
+    <!-- New trainer form -->
+    <div id="panel-new" style="width:100%;display:none;flex-direction:column;gap:10px;">
+      <div id="signin-name-label" class="field-label">Trainer Name</div>
+      <input id="trainer-name-input" type="text" maxlength="16"
+             placeholder="Enter your name…" autocomplete="off" spellcheck="false"/>
+
+      <div id="new-pin-label">Choose a 4-digit PIN</div>
+      <div id="pin-row-new">
+        <div class="pin-dot active" id="npd0">·</div>
+        <div class="pin-dot"        id="npd1">·</div>
+        <div class="pin-dot"        id="npd2">·</div>
+        <div class="pin-dot"        id="npd3">·</div>
+      </div>
+      <div id="numpad-new">
+        <button class="np-btn" onclick="npNewPress('1')">1</button>
+        <button class="np-btn" onclick="npNewPress('2')">2</button>
+        <button class="np-btn" onclick="npNewPress('3')">3</button>
+        <button class="np-btn" onclick="npNewPress('4')">4</button>
+        <button class="np-btn" onclick="npNewPress('5')">5</button>
+        <button class="np-btn" onclick="npNewPress('6')">6</button>
+        <button class="np-btn" onclick="npNewPress('7')">7</button>
+        <button class="np-btn" onclick="npNewPress('8')">8</button>
+        <button class="np-btn" onclick="npNewPress('9')">9</button>
+        <button class="np-btn empty"></button>
+        <button class="np-btn" onclick="npNewPress('0')">0</button>
+        <button class="np-btn del" onclick="npNewDel()">⌫</button>
+      </div>
+      <div id="new-error-msg" style="font-size:12px;color:#ff6b6b;text-align:center;min-height:16px;font-style:italic;"></div>
+      <button id="trainer-start-btn">Begin Adventure ▶</button>
+      <div class="back-link" onclick="switchTab('signin')">← Back to Sign In</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ TRAINER HUD (shown in game) ══ -->
+<div id="trainer-hud">
+  <span id="hud-avatar">🐱</span>
+  <span id="hud-name">Trainer</span>
+  <span id="hud-badge">✏️ Change trainer</span>
+</div>
+
 <div id="overlay"></div>
 
 <!-- Fireworks Overlay -->
@@ -879,7 +1216,7 @@ body.ninja-mode::after {
   <div id="timer-toggle-row">
     <span id="timer-toggle-label">Timer</span>
     <label class="toggle-switch">
-      <input type="checkbox" id="timer-toggle" checked>
+      <input type="checkbox" id="timer-toggle">
       <div class="toggle-track"></div>
       <div class="toggle-thumb"></div>
     </label>
@@ -901,6 +1238,9 @@ body.ninja-mode::after {
   </div>
 
   <div id="feedback"></div>
+
+  <!-- Ninja Kitty cards — one per earn -->
+  <div id="ninja-cards-container"></div>
 
   <div class="bar-section">
     <div class="bar-label">
@@ -1461,7 +1801,7 @@ function fireBurst(svgEl){
 /* ════════════════════════════════════════════════════
    TIMER
 ════════════════════════════════════════════════════ */
-var TIMER_S=15, timerLeft=TIMER_S, timerIv=null, timerPaused=false, timerEnabled=true;
+var TIMER_S=15, timerLeft=TIMER_S, timerIv=null, timerPaused=false, timerEnabled=false;
 var CIRCUM=2*Math.PI*28;
 function setTimerDisplay(s){
   var ring=document.getElementById("timer-ring"),num=document.getElementById("timer-num");
@@ -1814,7 +2154,7 @@ function showPrizePopup(svgStr,name,trait,type){
 function closePrizePopup(){
   hidePopup("prize-popup");
   if(pendTreat){pendTreat=false;setTimeout(showTreatPopup,250);}
-  else if(streak===20 && !ninjaUnlocked){ setTimeout(showNinjaPopup,300); }
+  else if(streak>0 && streak%20===0){ setTimeout(showNinjaPopup,300); }
   else{newQuestion();}
 }
 
@@ -1884,6 +2224,7 @@ function checkAnswer(){
     document.getElementById("correct-count").textContent=correct;
     document.getElementById("streak-count").textContent=streak;
     if(getLvI()>prev)growAll();
+    updateNinjaBadgeStreak();
     fb.textContent=RIGHT[Math.floor(Math.random()*RIGHT.length)];
     fb.className="feedback-right";
     playCelebration();
@@ -2391,12 +2732,14 @@ function closeDancePopup(){
    NINJA KITTY SYSTEM
 ════════════════════════════════════════════════════ */
 var ninjaUnlocked = false;
+var ninjaCount = 0;
+var ninjaDates = []; // timestamps for each earned card
 var NK = { raf:null, frame:0 };
 
 /* ── Add Ninja Kitty to Pokédex ── */
 function addNinjaToDex(){
   var grid = document.getElementById("dex-grid");
-  var empty = document.getElementById("empty-msg");
+  var empty = document.getElementById("empty-msg") || grid.querySelector(".dex-empty-hint");
   if(empty) empty.parentNode.removeChild(empty);
 
   var wrap = document.createElement("div");
@@ -2506,7 +2849,7 @@ function explodeRocket(r){
   }
 }
 
-function showFireworks(){
+function showFireworks(onDone){
   var overlay=document.getElementById("fireworks-overlay");
   var canvas=document.getElementById("fireworks-canvas");
   var W=window.innerWidth, H=window.innerHeight;
@@ -2562,14 +2905,16 @@ function showFireworks(){
     if(elapsed<5000){ FW.raf=requestAnimationFrame(fwTick); }
     else {
       clearInterval(rocketIv);
-      var fade=setInterval(function(){
-        ctx.fillStyle="rgba(0,0,0,0.12)"; ctx.fillRect(0,0,W,H);
-        if(FW.particles.length===0){
-          clearInterval(fade);
-          overlay.style.display="none";
-          ctx.clearRect(0,0,W,H);
-        }
-      },30);
+      overlay.style.transition="opacity 1.2s ease";
+      overlay.style.opacity="0";
+      setTimeout(function(){
+        overlay.style.display="none";
+        overlay.style.opacity="1";
+        overlay.style.transition="";
+        ctx.clearRect(0,0,W,H);
+        FW.rockets=[]; FW.particles=[];
+        if(onDone) onDone();
+      }, 1300);
     }
   }
   FW.raf=requestAnimationFrame(fwTick);
@@ -2816,7 +3161,6 @@ function playNinjaMusic(){
 
 function showNinjaPopup(){
   pauseTimer();
-  ninjaUnlocked=true;
   var el=document.getElementById("ninja-popup");
   var card=document.getElementById("ninja-card");
   el.style.background="rgba(0,0,0,0)";
@@ -2856,10 +3200,15 @@ function closeNinjaPopup(){
     if(NK.raf){cancelAnimationFrame(NK.raf);NK.raf=null;}
     // Activate ninja background mode
     document.body.classList.add("ninja-mode");
-    // Add Ninja Kitty to Pokédex
-    addNinjaToDex();
+    // Track each earned ninja card
+    ninjaCount++;
+    ninjaDates.push(Date.now());
+    if(!ninjaUnlocked){ ninjaUnlocked=true; addNinjaToDex(); }
+    addNinjaCard(ninjaCount, ninjaDates[ninjaDates.length-1]);
+    saveTrainer();
     timerPaused=false;
-    newQuestion();
+    // Launch fireworks, resume game after they fade
+    showFireworks(function(){ newQuestion(); });
   },400);
 }
 
@@ -2871,11 +3220,397 @@ document.getElementById("overlay").addEventListener("click", function(){
   if(dp.classList.contains("show")) closeDancePopup();
 });
 
-// ── Default start: addition mode, first question ready ──
-currentMode = "addition";
+/* ════════════════════════════════════════════════════
+   TRAINER PROFILE SYSTEM — name + PIN login, per-trainer saves
+════════════════════════════════════════════════════ */
+var TRAINER = { name:"", avatar:"🐱" };
+var SAVE_PREFIX       = "pokemath_t_";
+var TRAINERS_INDEX_KEY = "pokemath_trainers";
+
+/* ── Storage ── */
+function trainerKey(name){
+  return SAVE_PREFIX + name.trim().toLowerCase().replace(/\s+/g,"_");
+}
+function getAllTrainerNames(){
+  try{ var r=localStorage.getItem(TRAINERS_INDEX_KEY); return r?JSON.parse(r):[]; }catch(e){ return []; }
+}
+function registerTrainerName(name){
+  var all=getAllTrainerNames();
+  if(all.indexOf(name)===-1) all.push(name);
+  try{ localStorage.setItem(TRAINERS_INDEX_KEY, JSON.stringify(all)); }catch(e){}
+}
+function saveTrainer(){
+  if(!TRAINER.name) return;
+  var monsSave=mons.map(function(m){
+    return {seed:m.seed, name:m.name, size:m.size,
+            typeName:m.type?m.type.name:"", typeBadge:m.type?m.type.badge:""};
+  });
+  var data={ name:TRAINER.name, avatar:TRAINER.avatar, pin:TRAINER.pin,
+             correct:correct, streak:streak, monsCount:mons.length,
+             monsData:monsSave,
+             ninjaUnlocked:ninjaUnlocked, ninjaCount:ninjaCount, ninjaDates:ninjaDates, savedAt:Date.now() };
+  try{ localStorage.setItem(trainerKey(TRAINER.name), JSON.stringify(data)); }catch(e){}
+  registerTrainerName(TRAINER.name);
+}
+function loadTrainerData(name){
+  try{ var r=localStorage.getItem(trainerKey(name)); return r?JSON.parse(r):null; }catch(e){ return null; }
+}
+function formatDate(ts){
+  if(!ts) return "";
+  return new Date(ts).toLocaleDateString(undefined,{month:"short",day:"numeric"});
+}
+
+/* ── Particle background ── */
+function startTrainerBg(){
+  var canvas=document.getElementById("trainer-bg-canvas");
+  if(!canvas) return;
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  var ctx=canvas.getContext("2d"), particles=[];
+  for(var i=0;i<60;i++) particles.push({
+    x:Math.random()*canvas.width, y:Math.random()*canvas.height,
+    r:.5+Math.random()*2, vx:(Math.random()-.5)*.4, vy:-.2-Math.random()*.4,
+    col:["#8833ff","#cc44ff","#4a9eff","#f5c842","#ff44cc"][Math.floor(Math.random()*5)],
+    life:Math.random()
+  });
+  function tick(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    particles.forEach(function(p){
+      p.x+=p.vx; p.y+=p.vy; p.life+=.005;
+      if(p.y<-5||p.life>1){ p.y=canvas.height+5; p.x=Math.random()*canvas.width; p.life=0; }
+      ctx.save(); ctx.globalAlpha=Math.sin(p.life*Math.PI)*.7;
+      ctx.fillStyle=p.col; ctx.shadowBlur=6; ctx.shadowColor=p.col;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); ctx.restore();
+    });
+    canvas._raf=requestAnimationFrame(tick);
+  }
+  tick();
+}
+
+/* ── Tab switching ── */
+function switchTab(tab){
+  document.getElementById("panel-signin").style.display = tab==="signin"?"flex":"none";
+  document.getElementById("panel-new").style.display    = tab==="new"   ?"flex":"none";
+  document.getElementById("tab-signin").classList.toggle("active", tab==="signin");
+  document.getElementById("tab-new"   ).classList.toggle("active", tab==="new");
+  if(tab==="signin") populateSavedTrainers();
+}
+
+/* ── Populate saved trainers list ── */
+function populateSavedTrainers(){
+  var names=getAllTrainerNames();
+  var list=document.getElementById("saved-trainers-list");
+  var noMsg=document.getElementById("no-trainers-msg");
+  list.innerHTML="";
+  if(names.length===0){
+    noMsg.style.display="block";
+    document.getElementById("signin-pin-section").style.display="none";
+    return;
+  }
+  noMsg.style.display="none";
+  names.forEach(function(name){
+    var data=loadTrainerData(name);
+    if(!data) return;
+    var row=document.createElement("div");
+    row.style.cssText="display:flex;align-items:center;gap:12px;background:rgba(80,30,140,.3);border:1.5px solid #4422aa;border-radius:12px;padding:10px 14px;cursor:pointer;transition:all .18s;";
+    row.innerHTML=
+      "<span style='font-size:26px;'>"+(data.avatar||"🎮")+"</span>"+
+      "<div style='flex:1;'>"+
+        "<div style='font-size:14px;font-weight:800;color:#e8d0ff;'>"+data.name+"</div>"+
+        "<div style='font-size:11px;color:#7755aa;margin-top:2px;'>"+
+          (data.monsCount||0)+" companions · "+(data.correct||0)+" correct"+
+          (data.savedAt?" · "+formatDate(data.savedAt):"")+
+        "</div></div>"+
+      "<span style='color:#8833ff;font-size:18px;'>▶</span>";
+    row.addEventListener("mouseenter",function(){ row.style.borderColor="#aa55ff"; row.style.background="rgba(100,40,180,.4)"; });
+    row.addEventListener("mouseleave",function(){ row.style.borderColor="#4422aa"; row.style.background="rgba(80,30,140,.3)"; });
+    row.addEventListener("click",function(){ showPinEntry(data); });
+    list.appendChild(row);
+  });
+}
+
+/* ── PIN entry for sign-in ── */
+var signinTarget=null, signinPin="";
+function showPinEntry(data){
+  signinTarget=data; signinPin="";
+  document.getElementById("saved-trainers-list").style.display="none";
+  document.getElementById("no-trainers-msg").style.display="none";
+  document.getElementById("signin-pin-section").style.display="flex";
+  document.getElementById("signin-selected-name").textContent=(data.avatar||"🎮")+" "+data.name;
+  document.getElementById("login-error-msg").textContent="";
+  updateSigninDots();
+}
+function cancelPinEntry(){
+  signinTarget=null; signinPin="";
+  document.getElementById("signin-pin-section").style.display="none";
+  document.getElementById("saved-trainers-list").style.display="flex";
+  document.getElementById("login-error-msg").textContent="";
+  var nm=getAllTrainerNames();
+  if(nm.length===0) document.getElementById("no-trainers-msg").style.display="block";
+}
+function npPress(d){
+  if(signinPin.length>=4) return;
+  signinPin+=d;
+  updateSigninDots();
+  if(signinPin.length===4) setTimeout(checkSigninPin, 120);
+}
+function npDel(){
+  signinPin=signinPin.slice(0,-1);
+  updateSigninDots();
+}
+function updateSigninDots(){
+  for(var i=0;i<4;i++){
+    var dot=document.getElementById("pd"+i);
+    dot.textContent = i<signinPin.length ? "●" : "·";
+    dot.classList.toggle("filled", i<signinPin.length);
+    dot.classList.toggle("active", i===signinPin.length);
+    dot.classList.remove("error");
+  }
+}
+function checkSigninPin(){
+  if(!signinTarget) return;
+  if(signinPin===String(signinTarget.pin)){
+    loginTrainer(signinTarget);
+  } else {
+    // Wrong PIN — shake + clear
+    var row=document.getElementById("pin-row");
+    row.classList.add("error");
+    for(var i=0;i<4;i++) document.getElementById("pd"+i).classList.add("error");
+    document.getElementById("login-error-msg").textContent="Wrong PIN — try again";
+    setTimeout(function(){
+      row.classList.remove("error");
+      signinPin="";
+      updateSigninDots();
+    },500);
+  }
+}
+
+/* ── New trainer PIN entry ── */
+var newPin="";
+function npNewPress(d){
+  if(newPin.length>=4) return;
+  newPin+=d;
+  updateNewDots();
+  checkNewReady();
+}
+function npNewDel(){
+  newPin=newPin.slice(0,-1);
+  updateNewDots();
+  checkNewReady();
+}
+function updateNewDots(){
+  for(var i=0;i<4;i++){
+    var dot=document.getElementById("npd"+i);
+    dot.textContent = i<newPin.length ? "●" : "·";
+    dot.classList.toggle("filled", i<newPin.length);
+    dot.classList.toggle("active", i===newPin.length);
+  }
+}
+function checkNewReady(){
+  var name=document.getElementById("trainer-name-input").value.trim();
+  document.getElementById("trainer-start-btn").classList.toggle("ready", name.length>=2 && newPin.length===4);
+}
+document.getElementById("trainer-name-input").addEventListener("input", checkNewReady);
+
+/* ── Create new trainer ── */
+document.getElementById("trainer-start-btn").addEventListener("click", function(){
+  var name=document.getElementById("trainer-name-input").value.trim();
+  if(name.length<2||newPin.length!==4) return;
+  // Check name not already taken
+  var existing=loadTrainerData(name);
+  if(existing){
+    document.getElementById("new-error-msg").textContent="That name is taken — choose another!";
+    return;
+  }
+  document.getElementById("new-error-msg").textContent="";
+  // Reset game state for brand-new trainer
+  correct=0; streak=0; mons=[]; ninjaUnlocked=false; ninjaCount=0; ninjaDates=[];
+  document.getElementById("correct-count").textContent=0;
+  document.getElementById("streak-count").textContent=0;
+  document.getElementById("kitty-count").textContent=0;
+  document.getElementById("dex-sidebar-count").textContent="0 companions";
+  document.getElementById("dex-grid").innerHTML=
+    '<div class="dex-empty-hint">Answer questions to capture companions!<br>Click them to watch them dance 💃</div>';
+  document.body.classList.remove("ninja-mode");
+  TRAINER.name=name; TRAINER.avatar="🎮"; TRAINER.pin=newPin;
+  saveTrainer();
+  updateBars();
+  hideTrainerScreen();
+});
+
+/* ── Login existing trainer ── */
+function loginTrainer(data){
+  TRAINER.name=data.name; TRAINER.avatar=data.avatar||"🎮"; TRAINER.pin=data.pin;
+  correct=data.correct||0; streak=data.streak||0; ninjaUnlocked=data.ninjaUnlocked||false;
+  ninjaCount=data.ninjaCount||0; ninjaDates=data.ninjaDates||[];
+  document.getElementById("correct-count").textContent=correct;
+  document.getElementById("streak-count").textContent=streak;
+  if(ninjaUnlocked){ document.body.classList.add("ninja-mode"); }
+  // Restore Pokédex
+  mons=[];
+  var grid=document.getElementById("dex-grid");
+  grid.innerHTML="";
+  var monsSaved=data.monsData||[];
+  if(monsSaved.length===0){
+    grid.innerHTML='<div class="dex-empty-hint">Answer questions to capture companions!<br>Click them to watch them dance 💃</div>';
+  } else {
+    monsSaved.forEach(function(md,i){
+      var typeObj={name:md.typeName||"Normal", badge:md.typeBadge||"#888"};
+      var res=makeCreature(md.size||52, md.seed);
+      var wrap=document.createElement("div");
+      wrap.className="mon-wrap";
+      wrap.innerHTML=res.svg;
+      var badge=document.createElement("div");
+      badge.className="mon-type-badge";
+      badge.style.background=typeObj.badge;
+      badge.textContent=typeObj.name;
+      wrap.appendChild(badge);
+      wrap.title=md.name;
+      grid.appendChild(wrap);
+      var durs=["3.1s","3.5s","2.9s","3.7s","3.3s","2.7s","3.9s"];
+      var dlys=["0s","0.4s","0.8s","0.2s","0.6s","1.0s","0.15s"];
+      var idx=i%durs.length;
+      setTimeout(function(w,ix){ return function(){
+        w.style.setProperty("--dur",durs[ix]);
+        w.style.setProperty("--dly",dlys[ix]);
+        w.classList.add("idle");
+      };}(wrap,idx), 200+i*40);
+      var monObj={size:md.size||52, seed:md.seed, el:wrap, name:md.name, type:typeObj};
+      mons.push(monObj);
+      (function(m){ wrap.addEventListener("click",function(){ showDancePopup(m); }); })(monObj);
+    });
+  }
+  // Update counts BEFORE ninja so addNinjaToDex can add +1 correctly
+  document.getElementById("kitty-count").textContent=mons.length;
+  document.getElementById("dex-sidebar-count").textContent=mons.length+" companion"+(mons.length!==1?"s":"");
+  // Restore ninja AFTER counts are set
+  if(ninjaUnlocked) addNinjaToDex();
+  // Restore ninja card
+  if(ninjaCount>0) updateNinjaCard();
+  updateBars();
+  hideTrainerScreen();
+}
+
+/* ── Show trainer screen ── */
+function showTrainerScreen(){
+  var screen=document.getElementById("trainer-screen");
+  screen.style.display="flex"; screen.style.opacity="1";
+  // Reset new form
+  document.getElementById("trainer-name-input").value="";
+  newPin=""; updateNewDots();
+  document.getElementById("trainer-start-btn").classList.remove("ready");
+  document.getElementById("new-error-msg").textContent="";
+  // Start on Sign In tab if trainers exist, else New Trainer
+  var names=getAllTrainerNames();
+  switchTab(names.length>0?"signin":"new");
+  startTrainerBg();
+}
+
+/* ── Hide trainer screen ── */
+function hideTrainerScreen(){
+  var screen=document.getElementById("trainer-screen");
+  screen.style.transition="opacity .4s"; screen.style.opacity="0";
+  var canvas=document.getElementById("trainer-bg-canvas");
+  if(canvas&&canvas._raf) cancelAnimationFrame(canvas._raf);
+  setTimeout(function(){
+    screen.style.display="none"; screen.style.transition=""; screen.style.opacity="1";
+    var tw=document.getElementById("timer-wrap");
+    if(tw) tw.style.display="none";
+    document.getElementById("timer-toggle-label").textContent="No Timer";
+  },420);
+  updateHUD();
+  document.getElementById("trainer-hud").classList.add("show");
+}
+
+function updateHUD(){
+  document.getElementById("hud-avatar").textContent=TRAINER.avatar||"🎮";
+  document.getElementById("hud-name").textContent=TRAINER.name||"Trainer";
+}
+
+/* ── HUD click → re-login ── */
+document.getElementById("trainer-hud").addEventListener("click",function(){
+  saveTrainer();
+  document.getElementById("trainer-hud").classList.remove("show");
+  showTrainerScreen();
+});
+
+/* ── Auto-save on capture ── */
+var _origAddMon=addMon;
+addMon=function(isTreat){ _origAddMon(isTreat); saveTrainer(); };
+
+/* ── Ninja Kitty cards ── */
+function drawNinjaCardCanvas(ctx){
+  var g=ctx.createLinearGradient(0,0,0,44);
+  g.addColorStop(0,"#0a0018"); g.addColorStop(1,"#150030");
+  ctx.fillStyle=g; ctx.fillRect(0,0,44,44);
+  ctx.strokeStyle="rgba(160,60,255,0.7)"; ctx.lineWidth=1.2;
+  ctx.beginPath(); ctx.arc(22,20,16,0,Math.PI*2); ctx.stroke();
+  ctx.fillStyle="#1e0035";
+  ctx.beginPath(); ctx.ellipse(22,20,9,8,0,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(22,29,8,7,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle="#150025";
+  ctx.beginPath(); ctx.moveTo(15,14); ctx.lineTo(12,7); ctx.lineTo(19,12); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(29,14); ctx.lineTo(32,7); ctx.lineTo(25,12); ctx.closePath(); ctx.fill();
+  ctx.fillStyle="#111"; ctx.fillRect(13,15,18,4);
+  [[19,18],[25,18]].forEach(function(e){
+    ctx.fillStyle="#cc7700"; ctx.shadowBlur=4; ctx.shadowColor="#ff9900";
+    ctx.beginPath(); ctx.arc(e[0],e[1],2.5,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle="#000"; ctx.shadowBlur=0;
+    ctx.beginPath(); ctx.ellipse(e[0],e[1],.6,2,0,0,Math.PI*2); ctx.fill();
+  });
+  ctx.fillStyle="#f5c842"; ctx.shadowBlur=5; ctx.shadowColor="#f5c842";
+  ctx.font="bold 9px sans-serif"; ctx.textAlign="center"; ctx.textBaseline="middle";
+  ctx.fillText("★",22,39); ctx.shadowBlur=0;
+}
+
+function addNinjaCard(num, ts, skipSave){
+  updateNinjaCard();
+}
+
+function updateNinjaCard(){
+  var container=document.getElementById("ninja-cards-container");
+  container.innerHTML="";
+  if(ninjaCount===0) return;
+  var card=document.createElement("div");
+  card.className="ninja-card-badge";
+  // Canvas
+  var cnv=document.createElement("canvas");
+  cnv.width=44; cnv.height=44; cnv.className="ninja-card-canvas";
+  drawNinjaCardCanvas(cnv.getContext("2d"));
+  card.appendChild(cnv);
+  // Info
+  var info=document.createElement("div");
+  info.className="ninja-card-info";
+  var title=document.createElement("div");
+  title.className="ninja-card-title";
+  title.textContent="🥷 Ninja Kitty";
+  var sub=document.createElement("div");
+  sub.className="ninja-card-sub";
+  sub.textContent="Tap for fireworks!";
+  info.appendChild(title); info.appendChild(sub);
+  card.appendChild(info);
+  // Total earned count
+  var numEl=document.createElement("div");
+  numEl.className="ninja-card-num";
+  numEl.textContent="Earned: "+ninjaCount+"×";
+  card.appendChild(numEl);
+  card.addEventListener("click", function(){ showFireworks(null); });
+  container.appendChild(card);
+}
+
+function updateNinjaBadgeStreak(){
+  var container=document.getElementById("ninja-cards-container");
+  if(!container || !container.lastChild) return;
+  var sub=container.lastChild.querySelector(".ninja-card-sub");
+  if(sub) sub.textContent=streak>0 ? "🔥 Streak: "+streak : "Tap for fireworks!";
+}
+
+// ── Init ──
+currentMode="addition";
 document.querySelector('.mode-card[data-mode="addition"]').classList.add("active");
+timerEnabled=false;
 updateBars();
 newQuestion();
+showTrainerScreen();
 </script>
 </body>
 </html>
